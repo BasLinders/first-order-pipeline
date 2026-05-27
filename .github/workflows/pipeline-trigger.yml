@@ -1,0 +1,70 @@
+name: Run Pipeline
+
+on:
+  # Trigger manually via the GitHub Actions UI with per-run parameters.
+  workflow_dispatch:
+    inputs:
+      experiment_id:
+        description: "Experiment ID (e.g. EXP_001)"
+        required: true
+      start_date:
+        description: "Start date (YYYY-MM-DD)"
+        required: true
+      end_date:
+        description: "End date (YYYY-MM-DD)"
+        required: true
+      variants:
+        description: "Comma-separated variant labels (e.g. Control,Variant_B)"
+        required: true
+      query_type:
+        description: "Query type: aggregated or continuous"
+        required: false
+        default: "aggregated"
+
+  # Unattended weekly run every Monday at 06:00 UTC.
+  # Set EXPERIMENT_ID / START_DATE / END_DATE / VARIANTS as repository secrets
+  # or variables for the scheduled path.
+  schedule:
+    - cron: "0 6 * * 1"
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install runtime dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install first-order-engine
+        env:
+          FOE_GITHUB_TOKEN: ${{ secrets.FOE_GITHUB_TOKEN }}
+        run: |
+          pip install git+https://${FOE_GITHUB_TOKEN}@github.com/BasLinders/first-order-engine.git@main
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Run pipeline
+        env:
+          # workflow_dispatch inputs take priority; fall back to repository secrets
+          # for the scheduled run (inputs are empty strings on schedule).
+          EXPERIMENT_ID: ${{ github.event.inputs.experiment_id || secrets.DEFAULT_EXPERIMENT_ID }}
+          START_DATE: ${{ github.event.inputs.start_date || secrets.DEFAULT_START_DATE }}
+          END_DATE: ${{ github.event.inputs.end_date || secrets.DEFAULT_END_DATE }}
+          VARIANTS: ${{ github.event.inputs.variants || secrets.DEFAULT_VARIANTS }}
+          QUERY_TYPE: ${{ github.event.inputs.query_type || 'aggregated' }}
+          BQ_DATASET_PATH: ${{ secrets.BQ_DATASET_PATH }}
+          AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
+          AIRTABLE_BASE_ID: ${{ secrets.AIRTABLE_BASE_ID }}
+          AIRTABLE_TABLE_NAME: ${{ secrets.AIRTABLE_TABLE_NAME }}
+        run: python main.py
