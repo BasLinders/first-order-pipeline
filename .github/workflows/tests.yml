@@ -27,11 +27,14 @@ jobs:
 
       - name: Install dependencies
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # FOE_GITHUB_TOKEN is a PAT with repo scope, stored as a repository
+          # secret. GITHUB_TOKEN cannot be used here because it is scoped to
+          # this repo only and cannot access first-order-engine (private repo).
+          FOE_TOKEN: ${{ secrets.FOE_GITHUB_TOKEN }}
         run: |
           pip install pytest pytest-mock
           pip install -r requirements.txt
-          git config --global url."https://oauth2:${GH_TOKEN}@github.com/".insteadOf "https://github.com/"
+          git config --global url."https://oauth2:${FOE_TOKEN}@github.com/".insteadOf "https://github.com/"
           pip install git+https://github.com/BasLinders/first-order-engine.git@main
 
       - name: Run tests
