@@ -26,10 +26,13 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           pip install pytest pytest-mock
           pip install -r requirements.txt
-          pip install git+https://${{ secrets.GITHUB_TOKEN }}@github.com/BasLinders/first-order-engine.git@main
+          git config --global url."https://oauth2:${GH_TOKEN}@github.com/".insteadOf "https://github.com/"
+          pip install git+https://github.com/BasLinders/first-order-engine.git@main
 
       - name: Run tests
         run: pytest tests/
