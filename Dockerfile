@@ -18,7 +18,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Securely install private GitHub repository.
 RUN --mount=type=secret,id=github_token \
     git config --global url."https://$(cat /run/secrets/github_token)@github.com/".insteadOf "https://github.com/" && \
-    pip install --no-cache-dir git+https://github.com/your-username/your-repo-name.git@main
+    pip install --no-cache-dir git+https://github.com/BasLinders/first-order-engine.git@main
 
 # Copy execution script
 COPY main.py .

@@ -1,0 +1,31 @@
+name: Docker Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          tags: first-order-pipeline:${{ github.sha }}
+          # FOE_GITHUB_TOKEN must be stored as a GitHub Actions secret.
+          # Used by the Dockerfile's BuildKit secret to install first-order-engine.
+          secrets: |
+            github_token=${{ secrets.FOE_GITHUB_TOKEN }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
