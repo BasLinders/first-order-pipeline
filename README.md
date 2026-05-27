@@ -31,7 +31,7 @@ first-order-pipeline/
 │   └── workflows/
 │       ├── tests.yml                # Unit tests on Python 3.10–3.13 (on every push/PR)
 │       ├── docker-build.yml         # Docker image build validation (on every push/PR)
-│       └── pipeline-trigger.yml    # Manual dispatch + weekly cron to run the pipeline
+│       └── pipeline-trigger.yml     # Manual dispatch + weekly cron to run the pipeline
 │
 ├── Dockerfile                       # Container build for production runs
 ├── requirements.txt                 # Runtime dependencies (bigquery, pyairtable)
