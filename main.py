@@ -5,10 +5,8 @@ from typing import List, Dict, Any
 from foe.frequentist.operations import FrequentistEngine
 from foe.bayesian.operations import BayesianEngine
 from foe.core.models import ExperimentInput
-
-# These need to be written:
-# from extract import fetch_bigquery_data
-# from load import push_to_airtable
+from src.extract import fetch_bigquery_data
+from src.load import push_to_airtable
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
